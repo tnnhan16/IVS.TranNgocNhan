@@ -1,0 +1,187 @@
+﻿@model Tuple<IVS.Models.Model.ModelSearch, IPagedList<IVS.Models.Model.CategoryViewModel>>
+@using PagedList;
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .headerTable{
+        background:#0094ff;
+        color:white;
+        
+    }
+    .Label{
+        text-align:center;
+        text-align-last:center
+    }
+</style>
+<div class="headerTitle">
+    <ul class="crumbs2">
+        <li>@Html.ActionLink("Home", "Index", "Home", null, new { })</li>
+        <li>Category</li>
+    </ul>
+</div>
+<hr />
+@using (Html.BeginForm("Index", "Category", FormMethod.Post, new { @enctype = "multipart/form-data" }))
+{
+<div class="search">
+    <div class="row">
+        <div class="col col-md-2">
+                @Html.DropDownList("parent_id", new SelectList(string.Empty, "Key", "Value"), "--Select parent--", new { @class = "form-control" })
+        </div>
+        <div class="col col-md-2">
+                @Html.DropDownList("Child_id", new SelectList(string.Empty, "Key", "Value"), "--Select child--", new { @class = "form-control" })
+        </div>
+        <div class="col col-md-2">
+                @Html.TextBox("code", Model.Item1.code, new {@class="form-control", @placeholder = "Code" })
+        </div>
+        <div class="col col-md-2">
+                @Html.TextBox("name", Model.Item1.name, new { @class = "form-control", @placeholder = "Name" })
+        </div>
+        <div class="col col-md-2">
+                <input class="btn btn-success" value="Search" type="submit" />
+        </div>
+    </div>
+</div>
+    }
+<hr />
+
+    <div class="btn-action col-md-1"style="margin-top:5px;margin-bottom:5px;margin-left:-16px">
+        @Html.ActionLink("Add", "Add", "Category", new { }, new { @class = "btn btn-success btn-md" })
+    </div>
+<div class="clearfix"></div>
+<div class="table-responsive" id="divLis">
+    @if (ViewBag.ListSearch != null)
+    {
+
+        <style>
+            .headerTable {
+                background: #0094ff;
+                color: white;
+            }
+        </style>
+        <div class="table-responsive" id="divLis">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr class="headerTable">
+                        <th>
+                            @Resources.Resource.Category_lblCode
+                        </th>
+                        <th>
+                            @Resources.Resource.Category_lblName
+                        </th>
+                        <th>
+                            @Resources.Resource.Category_lblParent_Name
+                        </th>
+                        <th>
+                            @Resources.Resource.Category_lblDescription
+                        </th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Item2)
+                    {
+                            <tr>
+                                <td>
+                                    @Html.ActionLink(item.code, "View", "Category", new { @id = item.id }, new { })
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.parent_name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.description)
+                                </td>
+                                <td style="text-align:center">
+                                    <a href="@Url.Action("Edit", "Category", new { id = item.id })" title="Edit"><span class="glyphicon glyphicon-edit btn-update"></span></a>
+                                    <span class="glyphicon glyphicon-trash xoa" onclick="Xoa(@item.id)" style="color:red"></span>
+                                    <a href="@Url.Action("View", "Category", new { id = item.id })" title="Edit"><span class="glyphicon glyphicon-th-list"></span></a>
+                                </td>
+                            </tr>
+                    }
+
+                </tbody>
+            </table>
+            @if (ViewBag.ListSearch != null)
+            {
+                @Html.PagedListPager((IPagedList)Model.Item2, page => Url.Action("Index", new { page }))
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script src="~/Scripts/bootbox.min.js"></script>
+    <script>
+    function Xoa(ID) {
+        bootbox.confirm({
+            size: "small",
+            message: "Do you want to delete?",
+            callback: function(result){
+                if(result==true)
+                {
+                    tr = $(this).parents("tr");// tim <tr> chua <img> bi click
+                    $.ajax({
+                        method: 'POST',
+                        url: '/Category/Delete',
+                        data: { id: ID },
+                        success: function (Success) {
+                            if(Success.Message!=null)
+                            {
+                                tr.hide(1000);
+                                bootbox.alert({
+                                    message:"Delete successfully!",
+                                    size: 'small'
+                                });
+                                location.reload();
+                            }
+                            else{
+                                bootbox.alert({
+                                    message: "Unsuccessfully!",
+                                    size: 'small'
+                                });
+                            }
+
+                        }
+                    })
+                }
+            }
+        });
+    };
+
+    $(function () {
+        $.ajax({
+            type: "POST",
+            url: "/Category/GetParent",
+            datatype: "Json",
+            success: function (data) {
+                $.each(data, function (index, value) {
+                    $('#parent_id').append('<option value="' + value.id + '">' + value.name + '</option>');
+                });
+            }
+        });
+        //Xử lý lấy dữ liệu cho dropdowlist
+        $('#parent_id').change(function () {
+            $('#Child_id').empty();
+
+            $.ajax({
+                type: "POST",
+                url: "/Category/GetCategory",
+                datatype: "Json",
+                data: { id: $('#parent_id').val() },
+                success: function (data) {
+                    $.each(data, function (index, value) {
+                        $('#Child_id').append('<option value="' + value.id + '">' + value.name + '</option>');
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+}

@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button"  class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Product Item", "Index", "Item")</li>
+                    <li>@Html.ActionLink("Product Category", "Index", "Category")</li>
+                    <li>@Html.ActionLink("Measure", "Index", "Measure")</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
+    <script>
+        function selectAllNew() {
+            var checkAll = document.getElementById('chkAllItem');
+            var table = document.getElementById('tableData');
+            var inputs = table.getElementsByTagName('input');
+            var recordId = '';
+            var recordValue = '';
+            if (checkAll.checked == false) {
+
+                for (var i = 0; i < inputs.length; i++) {
+                    if (inputs[i].type == 'checkbox' && inputs[i].id != 'chkAllItem' && inputs[i].getAttribute("onclick") != null) {
+                        inputs[i].checked = false;
+                    }
+                }
+            }
+            else {
+                for (var i = 0; i < inputs.length; i++) {
+                    if (inputs[i].type == 'checkbox' && inputs[i].id != 'chkAllItem' && inputs[i].getAttribute("onclick") != null) {
+                        inputs[i].checked = true;
+                        recordId += inputs[i].id + ";";
+                        recordValue += inputs[i].getAttribute("value") + ";";
+                    }
+                }
+            }
+            $("#hdfRecordId").val(recordId);
+            $("#hdfRecordValue").val(recordValue);
+            //alert($("#hdfRecordId").val());
+        }
+        function selectItemNew(id) {
+            var checkItem = document.getElementById(id);
+            var textvalue = checkItem.getAttribute("value");
+            var checkAll = document.getElementById('chkAllItem');
+            var recordId = $("#hdfRecordId").val();
+            var recordValue = $("#hdfRecordValue").val();
+            if (checkItem.checked == false) {
+                checkAll.checked = false;
+                recordId = recordId.replace(id + ";", "");
+                recordValue = recordValue.replace(textvalue + ";", "");
+                $("#hdfRecordId").val(recordId);
+                $("#hdfRecordValue").val(recordValue);
+            }
+            else {
+                if (recordId.indexOf(id + ";") == -1) {
+                    recordId += id + ";";
+                    recordValue += textvalue + ";";
+                }
+                $("#hdfRecordId").val(recordId);
+                $("#hdfRecordValue").val(recordValue);
+                //Kiem tra tat cac cac checkbox co duoc check het khong
+                var table = document.getElementById('tableData');
+                var inputs = table.getElementsByTagName('input');
+                var check = true;
+                var recordId = '';
+                for (var i = 0; i < inputs.length; i++) {
+                    if (inputs[i].type == 'checkbox' && inputs[i].id != 'chkAllItem' && inputs[i].getAttribute("onclick") != null) {
+                        if (inputs[i].checked == false) {
+                            check = false;
+                            break;
+                        }
+                    }
+                }
+                if (check == true) {
+                    checkAll.checked = true;
+                }
+                else {
+                    checkAll.checked = false;
+                }
+            }
+
+        }
+    </script>
+
+
+
+
+
+</body>
+</html>
